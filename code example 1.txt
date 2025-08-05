@@ -1,0 +1,76 @@
+  import csv
+import os
+
+# Define max file size in bytes (5MB)
+MAX_FILE_SIZE = 5 * 1024 * 1024
+
+# Reference ranges (simplified for demo purposes)
+reference_ranges = {
+    "Hemoglobin": (12, 16),  # g/dL
+    "HDL Cholesterol": (40, 60),  # mg/dL
+    "Total Protein": (6.0, 8.3),  # g/dL
+    "Albumin": (3.5, 5.0),  # g/dL
+    "Globulin": (2.0, 3.5),  # g/dL
+    "C-Reactive Protein": (0, 3),  # mg/L
+    "Urea": (10, 40),  # mg/dL
+    "Creatinine": (0.6, 1.2),  # mg/dL
+    "Uric Acid": (3.5, 7.2),  # mg/dL
+    "Blood Glucose Level": (70, 99),  # mg/dL fasting
+}
+
+# Sample blood report data
+sample_data = [
+    ["Test Name", "Value"],
+    ["Hemoglobin", 13.5],
+    ["HDL Cholesterol", 45],
+    ["Total Protein", 6.8],
+    ["Albumin", 4.0],
+    ["Globulin", 2.8],
+    ["C-Reactive Protein", 3],
+    ["Urea", 25],
+    ["Creatinine", 0.9],
+    ["Uric Acid", 5.5],
+    ["Blood Glucose Level", 90]
+]
+
+def create_csv(file_path):
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(sample_data)
+    print(f"Sample blood report saved as {file_path}\n")
+
+def analyze_blood_report(file_path):
+    if not os.path.exists(file_path):
+        print("File not found.")
+        return
+
+    if os.path.getsize(file_path) > MAX_FILE_SIZE:
+        print("File is too large. Please upload a file smaller than 5MB.")
+        return
+
+    print("Analyzing report...\n")
+    with open(file_path, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            test_name = row['Test Name'].strip()
+            try:
+                value = float(row['Value'])
+            except ValueError:
+                print(f"Invalid value for {test_name}. Skipping.")
+                continue
+
+            if test_name in reference_ranges:
+                low, high = reference_ranges[test_name]
+                if value < low:
+                    print(f"{test_name}: Low. May need attention.")
+                elif value > high:
+                    print(f"{test_name}: High. Could be a concern.")
+                else:
+                    print(f"{test_name}: Normal. Looks good!")
+            else:
+                print(f"{test_name}: Test not recognized by this basic analyzer.")
+
+# Main code execution
+file_path = "blood_report.csv"
+create_csv(file_path)
+analyze_blood_report(file_path)
